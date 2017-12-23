@@ -101,16 +101,6 @@ function animate(){
   shipSizeH=shipSizeW*1.75608756098;
 }
 
-var listener = new window.keypress.Listener();
-
-//listener.simple_combo("up", function() {
-//  shipSpeedY=shipSpeedY-1;
-//});
-
-//listener.simple_combo("down", function() {
-//  shipSpeedY=shipSpeedY+1;
-//});
-
 document.addEventListener("keydown", function(event) {
   console.log(event.which);
   if(event.which==87){w=true;}
