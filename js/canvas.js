@@ -12,11 +12,17 @@ var star=document.getElementById('star');
 var asteroid=document.getElementById('asteroid');
 var ship=document.getElementById('ship');
 
+//sounds
+var scopeShot=document.getElementById('fireSounds');
+scopeShot.volume = 0.2; 
+
 //controls
 var w=false;
 var s=false;
 var a=false;
 var d=false;
+var shoot=false;
+var fired=false;
 
 //sprite sizing
 var earthSize=window.innerWidth/6;
@@ -96,6 +102,14 @@ function shipRot(){
   return shangle;
 }
 
+function fire(){
+  if(fired==false){
+    console.log('shot');
+    //fired=true;
+    scopeShot.play();
+  }
+}
+
 function animate(){
   requestAnimationFrame(animate);
   c.fillStyle="rgb(10,42,94)";
@@ -107,7 +121,6 @@ function animate(){
   //earth
   c.drawImage(earth,innerWidth/2-earthSize/2,innerHeight/2-earthSize/2,earthSize,earthSize);
   //moon
-  //c.drawImage(moon,innerWidth/2-moonSize/2+Math.cos(angle)*radius,innerHeight/2-moonSize/2+Math.sin(angle)*radius,moonSize,moonSize);
   drawImageRot(moon,innerWidth/2-moonSize+Math.cos(angle)*radius,innerHeight/2-moonSize/2+Math.sin(angle)*radius,moonSize,moonSize,moonRot);
   angle=angle+.01;
   moonRot=moonRot+.6;
@@ -121,7 +134,6 @@ function animate(){
   if (ay>innerHeight+asteroidSizeH+5){ay=0-asteroidSizeH;}
   if (ay<0-asteroidSizeH-5){ay=innerHeight+asteroidSizeH;}
   //ship
-  //c.drawImage(ship,sx,sy,shipSizeW,shipSizeH);
   drawImageRot(ship,sx,sy,shipSizeW,shipSizeH,shipRot());
   sx=sx+shipSpeedX;
   sy=sy+shipSpeedY;
@@ -129,6 +141,8 @@ function animate(){
   if (sy>innerHeight+shipSizeH){sy=0-shipSizeH;}
   if (sx<0-shipSizeH){sx=innerWidth+shipSizeH;}
   if (sx>innerWidth+shipSizeH){sx=0-shipSizeH}
+  //firing
+  if(shoot==true){fire();}
   //ship controls
   if (w==true){shipSpeedY=shipSpeedY-.1;}
   if (s==true){shipSpeedY=shipSpeedY+.1;}
@@ -145,6 +159,7 @@ function animate(){
 
 document.addEventListener("keydown", function(event) {
   //console.log(event.which);
+  if(event.which==32){shoot=true;}
   if(event.which==87){w=true;}
   if(event.which==83){s=true;}
   if(event.which==65){a=true;}
@@ -152,6 +167,7 @@ document.addEventListener("keydown", function(event) {
 });
 document.addEventListener("keyup", function(event) {
   //console.log('stop');
+  if(event.which==32){shoot=false;}
   if(event.which==87){w=false;}
   if(event.which==83){s=false;}
   if(event.which==65){a=false;}
