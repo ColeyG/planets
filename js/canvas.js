@@ -23,6 +23,7 @@ var a=false;
 var d=false;
 var shoot=false;
 var fired=false;
+var fireDelay=0;
 
 //sprite sizing
 var earthSize=window.innerWidth/6;
@@ -102,12 +103,20 @@ function shipRot(){
   return shangle;
 }
 
+//controls the fire function
 function fire(){
   if(fired==false){
-    console.log('shot');
-    //fired=true;
+    //console.log('shot');
+    fired=true;
     scopeShot.play();
   }
+  if(fireDelay>15){fired=false;fireDelay=0;}
+}
+
+//controls the burstfire and the amount of time between shots
+function refire(){
+  if(fireDelay<100){fireDelay++;}
+  //console.log(fireDelay);
 }
 
 function animate(){
@@ -143,6 +152,7 @@ function animate(){
   if (sx>innerWidth+shipSizeH){sx=0-shipSizeH}
   //firing
   if(shoot==true){fire();}
+  refire();
   //ship controls
   if (w==true){shipSpeedY=shipSpeedY-.1;}
   if (s==true){shipSpeedY=shipSpeedY+.1;}
@@ -159,7 +169,7 @@ function animate(){
 
 document.addEventListener("keydown", function(event) {
   //console.log(event.which);
-  if(event.which==32){shoot=true;}
+  if(event.which==86){shoot=true;}
   if(event.which==87){w=true;}
   if(event.which==83){s=true;}
   if(event.which==65){a=true;}
@@ -167,7 +177,7 @@ document.addEventListener("keydown", function(event) {
 });
 document.addEventListener("keyup", function(event) {
   //console.log('stop');
-  if(event.which==32){shoot=false;}
+  if(event.which==86){shoot=false;}
   if(event.which==87){w=false;}
   if(event.which==83){s=false;}
   if(event.which==65){a=false;}
