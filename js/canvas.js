@@ -24,6 +24,7 @@ var d=false;
 var shoot=false;
 var fired=false;
 var fireDelay=0;
+var shotArray=[];
 
 //sprite sizing
 var earthSize=window.innerWidth/6;
@@ -99,9 +100,32 @@ function shipRot(){
   if(shipSpeedX==0&&shipSpeedY>0){
     shangle=180;
   }
-  //SEND IFS TO CHECK QUADRANT
   return shangle;
 }
+
+function Shot(x,y,ssx,ssy,radius){
+  this.x=x;
+  this.y=y;
+  this.ssx=ssx;
+  this.ssy=ssy;
+  this.radius=radius;
+  this.draw=function(){
+    c.beginPath();
+    c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+    c.fillStyle="rgba(255,255,0,1)";
+    c.fill();
+    c.beginPath();
+    c.arc(this.x,this.y,this.radius-this.radius/3,0,Math.PI*2,false);
+    c.fillStyle="rgb(255,255,204)";
+    c.fill();
+    //console.log(this.x,this.y);
+  }
+  this.update=function(){
+    this.x+=this.ssx;
+    this.y+=this.ssy;
+    this.draw();
+  }
+};
 
 //controls the fire function
 function fire(){
@@ -109,6 +133,7 @@ function fire(){
     //console.log('shot');
     fired=true;
     scopeShot.play();
+    shotArray.push(new Shot(sx+shipSizeW/2,sy+shipSizeH/2,shipSpeedX,shipSpeedY,10));
   }
   if(fireDelay>15){fired=false;fireDelay=0;}
 }
@@ -165,6 +190,11 @@ function animate(){
   asteroidSizeH=window.innerWidth/128;
   shipSizeW=window.innerWidth/64;
   shipSizeH=shipSizeW*1.75608756098;
+    //begin shot clock
+    for(var i=0;i<shotArray.length;i++){
+      shotArray[i].update();
+    }
+    //end shot clock
 }
 
 document.addEventListener("keydown", function(event) {
