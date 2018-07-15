@@ -14,7 +14,7 @@ var ship=document.getElementById('ship');
 
 //sounds
 var scopeShot=document.getElementById('fireSounds');
-scopeShot.volume = 0.2; 
+scopeShot.volume = 0.1; 
 
 //controls
 var w=false;
@@ -109,20 +109,22 @@ function Shot(x,y,ssx,ssy,radius){
   this.ssx=ssx;
   this.ssy=ssy;
   this.radius=radius;
+  this.life=1;
   this.draw=function(){
     c.beginPath();
     c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
-    c.fillStyle="rgba(255,255,0,1)";
+    c.fillStyle="rgba(255,255,0,"+this.life+")";
     c.fill();
     c.beginPath();
     c.arc(this.x,this.y,this.radius-this.radius/3,0,Math.PI*2,false);
-    c.fillStyle="rgb(255,255,204)";
+    c.fillStyle="rgba(255,255,204,:"+this.life+")";
     c.fill();
     //console.log(this.x,this.y);
   }
   this.update=function(){
     this.x+=this.ssx;
     this.y+=this.ssy;
+    this.life=this.life-.01;
     this.draw();
   }
 };
@@ -146,6 +148,8 @@ function refire(){
 
 function animate(){
   requestAnimationFrame(animate);
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
   c.fillStyle="rgb(10,42,94)";
   c.fillRect(0,0,innerWidth,innerHeight);
   //stars
@@ -171,10 +175,10 @@ function animate(){
   drawImageRot(ship,sx,sy,shipSizeW,shipSizeH,shipRot());
   sx=sx+shipSpeedX;
   sy=sy+shipSpeedY;
-  if (sy<0-shipSizeH){sy=innerHeight+shipSizeH;}
-  if (sy>innerHeight+shipSizeH){sy=0-shipSizeH;}
-  if (sx<0-shipSizeH){sx=innerWidth+shipSizeH;}
-  if (sx>innerWidth+shipSizeH){sx=0-shipSizeH}
+  if(sy<0-shipSizeH/2){sy=innerHeight-shipSizeH}
+  if(sy>innerHeight-shipSizeH/2){sy=0}
+  if(sx<0-shipSizeH/2){sx=innerWidth-shipSizeH/2}
+  if(sx>innerWidth){sx=0}
   //firing
   if(shoot==true){fire();}
   refire();
