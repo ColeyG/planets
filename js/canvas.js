@@ -12,9 +12,11 @@ var star=document.getElementById('star');
 var asteroid=document.getElementById('asteroid');
 var ship=document.getElementById('ship');
 
-//sounds
-var scopeShot=document.getElementById('fireSounds');
-scopeShot.volume = 0.1; 
+//balancing
+//controls refire rate. May be between 1 and 99
+let fireRate=7;
+//sets whether or not the walls bounce the player back. False will bounce the player back.
+let bounce=true;
 
 //controls
 var w=false;
@@ -88,7 +90,6 @@ function shipRot(){
   }
   if(shipSpeedX<0&&shipSpeedY<=0){
     var shangle=Math.tan(shipSpeedX/shypotenuse)* (180 / Math.PI);
-    console.log('this');
   }
   if(shipSpeedX<0&&shipSpeedY>=0){
     var shangle=Math.tan(shipSpeedX*(-1)/shypotenuse)* (180 / Math.PI);
@@ -100,6 +101,10 @@ function shipRot(){
   }
   if(shipSpeedX==0&&shipSpeedY>0){
     shangle=180;
+  }
+  if(shangle<0){
+    let offset=shangle*(-1)
+    shangle=360-offset;
   }
   return shangle;
 }
@@ -139,27 +144,24 @@ function fire(){
     fired=true;
     //This calls the sound fx
     //scopeShot.play();
-    shotArray.push(new Shot(sx+shipSizeW/2,sy+shipSizeH/2,shipSpeedX,shipSpeedY,10));
+    let shotSound = new Audio('sounds/fire.wav');
+    shotSound.volume=0.1;
+    shotSound.play();
+
     let shotAngle=shipRot();
-    if(shotAngle<0){
-      let offset=shotAngle*(-1)
-      shotAngle=360-offset;
-    }
-    //begin here later. work on shot propulsion
-    let shotInformation =[
-      {name:'SpeedX',type:shipSpeedX},
-      {name:'SpeedY',type:shipSpeedY},
-      {name:'angle',type:shotAngle}
-    ];
-    console.table(shotInformation);
+    let shotX=shipSpeedX/((Math.abs(shipSpeedX)+Math.abs(shipSpeedY)))*10;
+    let shotY=shipSpeedY/((Math.abs(shipSpeedX)+Math.abs(shipSpeedY)))*10;
+
+    if(isNaN(shotX)||isNaN(shotY)){shotX=0;shotY=0;}
+
+    shotArray.push(new Shot(sx+shipSizeW/2,sy+shipSizeH/2,shipSpeedX+shotX,shipSpeedY+shotY,innerWidth/500));
   }
-  if(fireDelay>15){fired=false;fireDelay=0;}
+  if(fireDelay>fireRate){fired=false;fireDelay=0;}
 }
 
 //controls the burstfire and the amount of time between shots
 function refire(){
   if(fireDelay<100){fireDelay++;}
-  //console.log(fireDelay);
 }
 
 function animate(){
@@ -191,10 +193,34 @@ function animate(){
   drawImageRot(ship,sx,sy,shipSizeW,shipSizeH,shipRot());
   sx=sx+shipSpeedX;
   sy=sy+shipSpeedY;
-  if(sy<0-shipSizeH/2){sy=innerHeight-shipSizeH}
-  if(sy>innerHeight-shipSizeH/2){sy=0}
-  if(sx<0-shipSizeH/2){sx=innerWidth-shipSizeH/2}
-  if(sx>innerWidth){sx=0}
+  if(!bounce){
+    if(sy<0-shipSizeH/2){sy=innerHeight-shipSizeH}
+    if(sy>innerHeight-shipSizeH/2){sy=0}
+    if(sx<0-shipSizeH/2){sx=innerWidth-shipSizeH/2}
+    if(sx>innerWidth){sx=0}
+  }else{
+    if(sy<0-shipSizeH/2){
+      shipSpeedY=(shipSpeedY*-1);
+      sy=sy+shipSpeedY;
+      shipSpeedY=shipSpeedY*.5;
+    }
+    if(sy>innerHeight-shipSizeH/2){
+      shipSpeedY=(shipSpeedY*-1);
+      sy=sy+shipSpeedY;
+      shipSpeedY=shipSpeedY*.5;
+    }
+    if(sx<0-shipSizeH/2){
+      shipSpeedX=(shipSpeedX*-1);
+      sx=sx+shipSpeedX;
+      shipSpeedX=shipSpeedX*.5;
+    }
+    if(sx>innerWidth){
+      shipSpeedX=(shipSpeedX*-1);
+      sx=sx+shipSpeedX;
+      shipSpeedX=shipSpeedX*.5;
+    }
+  }
+  
   //firing
   if(shoot==true){fire();}
   refire();
