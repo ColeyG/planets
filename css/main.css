@@ -5,10 +5,7 @@
 	display:none;	
 }
 body{
-  
-}
-#canvas{
-  
+  overflow: hidden;
 }
 .sprite{
   display: none;
