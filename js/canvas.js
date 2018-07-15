@@ -88,6 +88,7 @@ function shipRot(){
   }
   if(shipSpeedX<0&&shipSpeedY<=0){
     var shangle=Math.tan(shipSpeedX/shypotenuse)* (180 / Math.PI);
+    console.log('this');
   }
   if(shipSpeedX<0&&shipSpeedY>=0){
     var shangle=Math.tan(shipSpeedX*(-1)/shypotenuse)* (180 / Math.PI);
@@ -110,6 +111,7 @@ function Shot(x,y,ssx,ssy,radius){
   this.ssy=ssy;
   this.radius=radius;
   this.life=1;
+  this.alive=true;
   this.draw=function(){
     c.beginPath();
     c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
@@ -125,7 +127,8 @@ function Shot(x,y,ssx,ssy,radius){
     this.x+=this.ssx;
     this.y+=this.ssy;
     this.life=this.life-.01;
-    this.draw();
+    if(this.life<0){this.alive=false;}
+    if(this.alive){this.draw();}
   }
 };
 
@@ -134,8 +137,21 @@ function fire(){
   if(fired==false){
     //console.log('shot');
     fired=true;
-    scopeShot.play();
+    //This calls the sound fx
+    //scopeShot.play();
     shotArray.push(new Shot(sx+shipSizeW/2,sy+shipSizeH/2,shipSpeedX,shipSpeedY,10));
+    let shotAngle=shipRot();
+    if(shotAngle<0){
+      let offset=shotAngle*(-1)
+      shotAngle=360-offset;
+    }
+    //begin here later. work on shot propulsion
+    let shotInformation =[
+      {name:'SpeedX',type:shipSpeedX},
+      {name:'SpeedY',type:shipSpeedY},
+      {name:'angle',type:shotAngle}
+    ];
+    console.table(shotInformation);
   }
   if(fireDelay>15){fired=false;fireDelay=0;}
 }
