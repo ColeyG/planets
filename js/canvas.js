@@ -12,11 +12,13 @@ var star=document.getElementById('star');
 var asteroid=document.getElementById('asteroid');
 var ship=document.getElementById('ship');
 
-//balancing
+//balancing & debug
 //controls refire rate. May be between 1 and 99
 let fireRate=7;
 //sets whether or not the walls bounce the player back. False will bounce the player back.
 let bounce=true;
+//sets the collision tester on or off
+let collisionTester=true;
 
 //controls
 var w=false;
@@ -164,6 +166,26 @@ function refire(){
   if(fireDelay<100){fireDelay++;}
 }
 
+//function for testing fire collisions
+function testTouch(){
+  let touching=false;
+  shotArray.forEach(element => {
+    //console.log(element.x);
+    let xDist = element.x-innerWidth/2
+    let yDist = element.y-innerHeight*.2
+
+    let distance = Math.sqrt(Math.pow(xDist,2)+Math.pow(yDist,2))
+    //console.log(distance);
+    if(distance<=50+element.radius){touching=true}
+  });
+  return touching;
+}
+
+//checks distance between two circular areas
+function distance(){
+  //start here later. perhaps make enemies first
+}
+
 function animate(){
   requestAnimationFrame(animate);
   canvas.width=window.innerWidth;
@@ -176,6 +198,24 @@ function animate(){
   }
   //earth
   c.drawImage(earth,innerWidth/2-earthSize/2,innerHeight/2-earthSize/2,earthSize,earthSize);
+  //collision tester
+  c.beginPath();
+  c.arc(innerWidth/2,innerHeight*.2,50,0,2*Math.PI,false);
+  //check collision
+  if(collisionTester){
+    if(testTouch()){
+      c.fillStyle = 'red';
+      c.fill();
+      c.lineWidth = 5;
+      c.strokeStyle = '#683e3c';
+    }else{
+      c.fillStyle = 'green';
+      c.fill();
+      c.lineWidth = 5;
+      c.strokeStyle = '#003300';
+    }
+    c.stroke();
+  }
   //moon
   drawImageRot(moon,innerWidth/2-moonSize+Math.cos(angle)*radius,innerHeight/2-moonSize/2+Math.sin(angle)*radius,moonSize,moonSize,moonRot);
   angle=angle+.01;
@@ -236,11 +276,11 @@ function animate(){
   asteroidSizeH=window.innerWidth/128;
   shipSizeW=window.innerWidth/64;
   shipSizeH=shipSizeW*1.75608756098;
-    //begin shot clock
-    for(var i=0;i<shotArray.length;i++){
-      shotArray[i].update();
-    }
-    //end shot clock
+  //begin shot clock
+  for(var i=0;i<shotArray.length;i++){
+    shotArray[i].update();
+  }
+  //end shot clock
 }
 
 document.addEventListener("keydown", function(event) {
