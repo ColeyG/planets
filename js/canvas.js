@@ -4,6 +4,7 @@ var canvas = document.getElementById('canvas');
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 var c = canvas.getContext('2d');
+var time =0;
 
 //sprites
 var earth=document.getElementById('earth');
@@ -11,6 +12,7 @@ var moon=document.getElementById('moon');
 var star=document.getElementById('star');
 var asteroid=document.getElementById('asteroid');
 var ship=document.getElementById('ship');
+var peon=document.getElementById('peon');
 
 //balancing & debug
 //controls refire rate. May be between 1 and 99
@@ -18,7 +20,7 @@ let fireRate=7;
 //sets whether or not the walls bounce the player back. False will bounce the player back.
 let bounce=true;
 //sets the collision tester on or off
-let collisionTester=true;
+let collisionTester=false;
 
 //controls
 var w=false;
@@ -29,6 +31,7 @@ var shoot=false;
 var fired=false;
 var fireDelay=0;
 var shotArray=[];
+var enemyArray=[];
 
 //sprite sizing
 var earthSize=window.innerWidth/6;
@@ -49,9 +52,9 @@ var astDeg=0;
 
 //ship
 var sx=innerWidth/2-shipSizeW/2;
-var sy=innerHeight/2-shipSizeH/2-earthSize/2-20;
+var sy=innerHeight/2-shipSizeH/2+earthSize/2-20;
 var shipSpeedX=0;
-var shipSpeedY=0;
+var shipSpeedY=-2;
 
 //stars
 var starAmount=1000;
@@ -133,11 +136,85 @@ function Shot(x,y,ssx,ssy,radius){
   this.update=function(){
     this.x+=this.ssx;
     this.y+=this.ssy;
-    this.life=this.life-.01;
+    this.life=this.life-.005;
     if(this.life<0){this.alive=false;}
     if(this.alive){this.draw();}
   }
 };
+
+//enemy controller
+function Enemy(type,side){
+  this.spawn=side;
+  this.tangible=false;
+  this.type=type;
+  if(side=='left'){
+    this.x=-20;
+    this.y=Math.random()*innerHeight;
+  }else if(side=='right'){
+    this.x=innerWidth+20;
+    this.y=Math.random()*innerHeight;
+  }
+  this.sx=0;
+  this.sy=0;
+  this.alive=true;
+  this.deg=0;
+  
+  //enemy type info:
+  if(type==peon){
+    this.accel=.01;
+    this.health=2;
+    this.size=30;
+    this.height=this.size;
+    this.width=this.size;
+  }else if(type=pip){
+    this.accel=.02;
+    this.health=1;
+    this.size=5;
+    this.height=this.size;
+    this.width=this.size;
+  }
+
+  this.draw=function(){
+    //console.log(this.type+'!'+this.x+'!'+this.y+'!'+this.width+'!'+this.height+'!'+this.deg);
+    drawImageRot(this.type,this.x-this.width/2,this.y-this.height/2,this.width,this.height,this.deg);
+  }
+  this.update=function(){
+    if(sx>this.x){this.sx=this.sx+this.accel}
+    if(sx<this.x){this.sx=this.sx-this.accel}
+    if(sy>this.y){this.sy=this.sy+this.accel}
+    if(sy<this.y){this.sy=this.sy-this.accel}
+    this.x=this.x+this.sx;
+    this.y=this.y+this.sy;
+
+    //bounces
+    if(this.tangible==true){
+      if(this.x<0){this.sx=this.sx*-1;}
+      if(this.x>innerWidth){this.sx=this.sx*-1}
+      if(this.y<0){this.sy=this.sy*-1}
+      if(this.y>innerHeight){this.sy=this.sy*-1}
+    }
+
+    //tangibility
+    if(this.spawn=='left'&&this.x>10){
+      this.tangible=true;
+    }
+    if(this.spawn=='right'&&this.x<innerWidth-10){
+      this.tangible=true;
+    }
+
+    if (this.alive){this.draw();}
+  }
+}
+
+//spawner
+function spawner(){
+  let spawnArray=[10,peon,'left',20,peon,'right',30,peon,'left',40,peon,'right'];
+  for(i=0;i<spawnArray.length;i++){
+    if(spawnArray[i]==time){
+      enemyArray.push(new Enemy(spawnArray[i+1],spawnArray[i+2]));
+    }
+  }
+}
 
 //controls the fire function
 function fire(){
@@ -188,6 +265,8 @@ function distance(){
 
 function animate(){
   requestAnimationFrame(animate);
+  spawner();
+  time++;
   canvas.width=window.innerWidth;
   canvas.height=window.innerHeight;
   c.fillStyle="rgb(10,42,94)";
@@ -281,6 +360,9 @@ function animate(){
     shotArray[i].update();
   }
   //end shot clock
+  for (var i=0;i<enemyArray.length;i++){
+    enemyArray[i].update();
+  }
 }
 
 document.addEventListener("keydown", function(event) {
