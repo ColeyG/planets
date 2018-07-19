@@ -13,6 +13,7 @@ var star=document.getElementById('star');
 var asteroid=document.getElementById('asteroid');
 var ship=document.getElementById('ship');
 var peon=document.getElementById('peon');
+var peonDmg=document.getElementById('peonDmg');
 
 //balancing & debug
 //controls refire rate. May be between 1 and 99
@@ -147,6 +148,7 @@ function Enemy(type,side){
   this.spawn=side;
   this.tangible=false;
   this.type=type;
+  this.state='fine';
   if(side=='left'){
     this.x=-20;
     this.y=Math.random()*innerHeight;
@@ -162,7 +164,7 @@ function Enemy(type,side){
   //enemy type info:
   if(type==peon){
     this.accel=.01;
-    this.health=2;
+    this.health=5;
     this.size=30;
     this.height=this.size;
     this.width=this.size;
@@ -176,7 +178,11 @@ function Enemy(type,side){
 
   this.draw=function(){
     //console.log(this.type+'!'+this.x+'!'+this.y+'!'+this.width+'!'+this.height+'!'+this.deg);
-    drawImageRot(this.type,this.x-this.width/2,this.y-this.height/2,this.width,this.height,this.deg);
+    let enemyImage=this.type;
+    if(this.type==peon&&this.state=='damage'){enemyImage=peonDmg;}
+    drawImageRot(enemyImage,this.x-this.width/2,this.y-this.height/2,this.width,this.height,this.deg);
+    if(this.state=='damage'){this.state='fine';this.health--;}
+    if(this.health==0){this.alive=false;}
   }
   this.update=function(){
     if(sx>this.x){this.sx=this.sx+this.accel}
@@ -259,13 +265,33 @@ function testTouch(){
 }
 
 //checks distance between two circular areas
-function distance(){
-  //start here later. perhaps make enemies first
+function distance(x1,y1,x2,y2){
+  console.log();
+  let xDist=x1-x2;
+  let yDist=y1-y2;
+
+  let distance = Math.sqrt(Math.pow(xDist,2)+Math.pow(yDist,2));
+
+  return distance;
+}
+
+function bulletEnemyCheck(){
+  enemyArray.forEach(element => {
+    shotArray.forEach(shot => {
+      let closeness = distance(element.x,element.y,shot.x,shot.y);
+      //console.log(closeness);
+      if(closeness<shot.radius+element.size&&shot.alive==true&&element.alive==true){
+        shot.alive=false;
+        element.state='damage';
+      }
+    });
+  });
 }
 
 function animate(){
   requestAnimationFrame(animate);
   spawner();
+  bulletEnemyCheck();
   time++;
   canvas.width=window.innerWidth;
   canvas.height=window.innerHeight;
