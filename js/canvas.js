@@ -5,6 +5,7 @@ canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 var c = canvas.getContext('2d');
 var time =0;
+let fullAlive=true;
 
 //sprites
 var earth=document.getElementById('earth');
@@ -182,7 +183,10 @@ function Enemy(type,side){
     if(this.type==peon&&this.state=='damage'){enemyImage=peonDmg;}
     drawImageRot(enemyImage,this.x-this.width/2,this.y-this.height/2,this.width,this.height,this.deg);
     if(this.state=='damage'){this.state='fine';this.health--;}
-    if(this.health==0){this.alive=false;}
+    if(this.health==0){this.alive=false;
+    enemyArray.push(new Enemy(peon,'left'));
+    enemyArray.push(new Enemy(peon,'right'));
+    }
   }
   this.update=function(){
     if(sx>this.x){this.sx=this.sx+this.accel}
@@ -214,7 +218,9 @@ function Enemy(type,side){
 
 //spawner
 function spawner(){
-  let spawnArray=[10,peon,'left',20,peon,'right',30,peon,'left',40,peon,'right'];
+  let spawnArray=[10,peon,'left'
+  ,20,peon,'right',30,peon,'left',40,peon,'right'
+];
   for(i=0;i<spawnArray.length;i++){
     if(spawnArray[i]==time){
       enemyArray.push(new Enemy(spawnArray[i+1],spawnArray[i+2]));
@@ -288,10 +294,23 @@ function bulletEnemyCheck(){
   });
 }
 
+function dead(){
+  let shipsX=sx;
+  let shipsY=sy;
+
+  enemyArray.forEach(element => {
+    let shipEDist=distance(shipsX,shipsY,element.x-element.width/2,element.y);
+    if(shipEDist+30<element.width+shipSizeW){fullAlive=false;}
+    //console.log(shipEDist);
+  });
+  //console.log(shipsX,shipsY);
+}
+
 function animate(){
-  requestAnimationFrame(animate);
+  if(fullAlive){requestAnimationFrame(animate);}
   spawner();
   bulletEnemyCheck();
+  dead();
   time++;
   canvas.width=window.innerWidth;
   canvas.height=window.innerHeight;
@@ -409,4 +428,10 @@ document.addEventListener("keyup", function(event) {
 });
 
 animate();
+
+function reload(){
+  location.reload();
+}
+
+window.addEventListener('resize',reload,false);
 })();
